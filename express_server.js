@@ -4,6 +4,10 @@ const app = express();
 
 const PORT = 8080; // default port 8080
 
+app.set("view engine", "ejs");
+
+
+
 
 // this is a JSON database of urls...proto shortener.
 const urlDatabase = {   
