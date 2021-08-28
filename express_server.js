@@ -41,6 +41,7 @@ app.get("/fetch", (req, res) => {
   res.send(`a = ${a}`);
 });
 
+//passes the URL data to temmplate3
 app.get("/urls", (req, res) => {
    const templateVars = { urls: urlDatabase };
    res.render('urls_index', templateVars);
