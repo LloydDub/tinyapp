@@ -73,6 +73,14 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.get('/u/:shortURL', (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL]
+  if (!urlDatabase[req.params.shortURL]) {
+    return res.send("Error, please check your shortened URL");
+ }
+res.redirect(longURL);
+});
+
 function generateRandomString() {
   const result = (Math.random() + 1).toString(36).substring(6)
   return result;
