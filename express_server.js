@@ -9,10 +9,19 @@ app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
-app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+// app.post("/urls", (req, res) => {
+//   console.log(req.body);  // Log the POST request body to the console
+//   res.send("Ok");         // Respond with 'Ok' (we will replace this)
+// });
+
+app.post('/urls', (req, res) => {
+  const shortURL = generateRandomString(); // if long url exsists 
+  urlDatabase[shortURL] = req.body.longURL;
+  console.log(urlDatabase);
+  res.redirect(`urls/${shortURL}`);
+  
 });
+
 
 // this is a JSON database of urls...proto shortener.
 const urlDatabase = {   
