@@ -4,14 +4,14 @@ const app = express();
 
 const PORT = 8080; // default port 8080
 
-app.set("view engine", "ejs");
+app.set('view engine', 'ejs');
 
-const bodyParser = require("body-parser");
+const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended: true}));
 
-// app.post("/urls", (req, res) => {
+// app.post('/urls', (req, res) => {
 //   console.log(req.body);  // Log the POST request body to the console
-//   res.send("Ok");         // Respond with 'Ok' (we will replace this)
+//   res.send('Ok');         // Respond with 'Ok' (we will replace this)
 // });
 
 app.post('/urls', (req, res) => {
@@ -22,16 +22,22 @@ app.post('/urls', (req, res) => {
   
 });
 
+app.post('/urls/:shortURL/delete', (req, res) => {
+  delete urlDatabase[req.params.shortURL];
+  res.redirect('/urls');
+
+})
+
 
 // this is a JSON database of urls...proto shortener.
 const urlDatabase = {   
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  'b2xVn2': 'http://www.lighthouselabs.ca',
+  '9sm5xK': 'http://www.google.com'
 };
 
-// this registers the a handler on the root path of "/"
-app.get("/", (req, res) => {
-  res.send("Hello!");
+// this registers the a handler on the root path of '/'
+app.get('/', (req, res) => {
+  res.send('Hello!');
 });
 
 app.listen(PORT, () => {
@@ -39,44 +45,44 @@ app.listen(PORT, () => {
 });
 
 // reguest handler for urldatabase
-app.get("/urls.json", (req, res) => {
+app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
 
 //
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>world</b></body></html>\n");
+app.get('/hello', (req, res) => {
+  res.send('<html><body>Hello <b>world</b></body></html>\n');
 });
 
-app.get("/set", (req, res) => {
+app.get('/set', (req, res) => {
   const a = 1;
   res.send(`a = ${a}`);
 });
  
-app.get("/fetch", (req, res) => {
+app.get('/fetch', (req, res) => {
   res.send(`a = ${a}`);
 });
 
 //passes the URL data to temmplate3
-app.get("/urls", (req, res) => {
+app.get('/urls', (req, res) => {
    const templateVars = { urls: urlDatabase };
    res.render('urls_index', templateVars);
 });
 
-app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+app.get('/urls/new', (req, res) => {
+  res.render('urls_new');
 });
 
-app.get("/urls/:shortURL", (req, res) => {
+app.get('/urls/:shortURL', (req, res) => {
   
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] }; 
-  res.render("urls_show", templateVars);
+  res.render('urls_show', templateVars);
 });
 
 app.get('/u/:shortURL', (req, res) => {
   const longURL = urlDatabase[req.params.shortURL]
   if (!urlDatabase[req.params.shortURL]) {
-    return res.send("Error, please check your shortened URL");
+    return res.send('Error, please check your shortened URL');
  }
 res.redirect(longURL);
 });
