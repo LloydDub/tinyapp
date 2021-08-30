@@ -17,7 +17,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.post('/urls', (req, res) => {
   const shortURL = generateRandomString(); // if long url exsists 
   urlDatabase[shortURL] = req.body.longURL;
-  console.log(urlDatabase);
+  
   res.redirect(`urls/${shortURL}`);
   
 });
@@ -26,8 +26,26 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect('/urls');
 
+});
+
+app.post('/urls/:shortURL', (req, res) => {
+  console.log(req.params)
+  console.log(req.params.shortURL)
+  urlDatabase[req.params.shortURL] = req.body.longURL;
+  res.redirect('/urls');
 })
 
+
+
+app.post('/urls/:shortURL/delete', (req, res) => {
+  delete urlDatabase[req.params.shortURL];
+  res.redirect('/urls');
+
+});
+// app.get('/urls/:shortUrl', (req, res) => {
+//   res.redirect(`urls/${req.params.shortURL}`);
+
+// })
 
 // this is a JSON database of urls...proto shortener.
 const urlDatabase = {   
