@@ -48,8 +48,8 @@ const addUser = (email, password) => {
 
 // Makes a username cookie to store user data
 app.post("/login", (req,res) => {
-  res.cookie('username', req.body.username);
-  res.redirect("/urls");
+  
+  res.redirect("/register");
 });
 
  // POST for generating smoll url w\ genrandom string
@@ -84,15 +84,15 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 
 //POST for logout button
 app.post("/logout", (req, res) => {
-  res.clearCookie('username');
-  res.redirect("/urls");
+  res.clearCookie("user_id");
+  res.redirect("/register");
 });
 
 
 // simple username login using cookies
 app.get('/register', (req, res) => {
   const templateVars = {
-    username: req.cookies["username"],
+    user: users[req.cookies["user_id"]],
     urls: urlDatabase 
   };
   res.render("urls_register", templateVars);
@@ -120,7 +120,7 @@ app.get('/urls.json', (req, res) => {
 //passes the URL data to temmplate3
 app.get('/urls', (req, res) => {
   const templateVars = {
-    username: req.cookies["username"],
+    user: users[req.cookies["user_id"]],
     urls: urlDatabase 
   };
   res.render('urls_index', templateVars);
@@ -128,14 +128,16 @@ app.get('/urls', (req, res) => {
 
 //template for new urls page w/username banner
 app.get('/urls/new', (req, res) => {
-  let templateVars = { username: req.cookies["username"] };
+  let templateVars = { 
+    user: users[req.cookies["user_id"]],
+};
   res.render("urls_new", templateVars);
 });
 
 app.get('/urls/:shortURL', (req, res) => {
 
   const templateVars = { 
-    username: req.cookies["username"],
+    user: users[req.cookies["user_id"]],
     shortURL: req.params.shortURL, 
     longURL: urlDatabase[req.params.shortURL] 
   };
