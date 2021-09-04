@@ -15,6 +15,17 @@ function generateRandomString() {
   return result;
 }
 
+const emailChecker = (email) => {
+  for (const user in users) {
+    
+    if (users[user].email === email) {
+
+      return user;
+    }
+  }
+  return null;
+};
+
 //Global user object
 const users = { 
   "userRandomID": {
@@ -46,13 +57,21 @@ const addUser = (email, password) => {
   return id;
 };
 
-// Makes a username cookie to store user data
-app.post("/login", (req,res) => {
+app.post("/logOn", (req,res) => {
   
-  res.redirect("/register");
+  res.redirect("/login");
+ 
 });
 
- // POST for generating smoll url w\ genrandom string
+
+
+app.post("/signUp", (req,res) => {
+  
+res.redirect("/register");
+
+});
+
+// POST for generating smoll url w\ genrandom string
 app.post('/urls', (req, res) => {
   const shortURL = generateRandomString(); // if long url exsists
   urlDatabase[shortURL] = req.body.longURL;
@@ -89,9 +108,10 @@ app.post("/logout", (req, res) => {
 });
 
 
-// simple username login using cookies
+// user_id login using cookies
 app.get('/register', (req, res) => {
   const templateVars = {
+
     user: users[req.cookies["user_id"]],
     urls: urlDatabase 
   };
@@ -112,6 +132,14 @@ app.listen(PORT, () => {
 // reguest handler for urldatabase
 app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
+});
+
+app.get('/login', (req, res) => {
+  const templateVars = {
+    user: users[req.cookies["user_id"]],
+    urls: urlDatabase 
+  };
+  res.render("urls_login", templateVars);
 });
 
 
@@ -152,14 +180,27 @@ app.get('/u/:shortURL', (req, res) => {
   res.redirect(longURL);
 });
 
+// Makes a username cookie to store user data
+app.post("/logOn", (req,res) => {
+  
+  res.redirect("/login");
+ 
+ });
+
 app.post('/register', (req, res) => {
   const {email, password } = req.body;
- 
+  if (emailChecker(email)) {
+    return res.status(400).send('Email Already Registered');
+  }   
   const user_id = addUser(email, password);
-  res.cookie('user_id', user_id);
+  console.log("Here it is", user_id)
+  if (email === '' || password === '') {
+    return res.status(400).send('400 Bad Request');
+  } 
   
-  res.redirect('/urls');
+    res.cookie('user_id', user_id);
+    res.redirect('/urls');
+   
 });
-
 
 
