@@ -14,14 +14,17 @@
     <!---Login-logout form-->
     <% if (user) { %>
       <form class="form-inline" action="/logout" method="POST">
-        <p><%= user.email%></p>
+        <p>Logged in As: <%= user.email%></p>
         <button type="submit" class="btn btn-primary">Logout</button>
       </form>
       <% } else { %>
-    <form class="form-inline" action="/login" method="POST">
-      
-      <button type="submit" class="btn btn-primary">Sign in</button>
+    <form class="form-inline" action="/signUp" method="POST">
+      <button type="submit" class="btn btn-primary">Sign-Up</button>
     </form>
+    <form class="form-inline" action="/logOn" method="POST">
+      <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+
     <% } %>
   </nav>
 </header> 
