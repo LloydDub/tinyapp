@@ -16,10 +16,8 @@ function generateRandomString() {
 }
 
 const emailChecker = (email) => {
-  for (const user in users) {
-    
+  for (const user in users) {    
     if (users[user].email === email) {
-
       return user;
     }
   }
@@ -45,6 +43,32 @@ const urlDatabase = {
   'b2xVn2': 'http://www.lighthouselabs.ca',
   '9sm5xK': 'http://www.google.com'
 };
+
+app.post("/login", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  if (!emailChecker(email)) {
+    res.send(403, "There is no account associated with this email address");
+  } else {
+    const user_id = emailChecker(email);
+    if (users[user_id].password !== password) {
+      res.send(403, "The password you entered does not match the one associated with the provided email address");
+    } else {
+      res.cookie('user_id', user_id);
+      res.redirect("/urls");
+    }
+  }
+
+});
+
+app.get('/login', (req, res) => {
+  const templateVars = {
+    user: users[req.cookies["user_id"]],
+    urls: urlDatabase 
+  };
+  res.render("urls_login", templateVars);
+});
 
 // 
 const addUser = (email, password) => {
@@ -104,7 +128,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 //POST for logout button
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
-  res.redirect("/register");
+  res.redirect("/login");
 });
 
 
@@ -134,13 +158,8 @@ app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
 
-app.get('/login', (req, res) => {
-  const templateVars = {
-    user: users[req.cookies["user_id"]],
-    urls: urlDatabase 
-  };
-  res.render("urls_login", templateVars);
-});
+
+
 
 
 
@@ -179,13 +198,6 @@ app.get('/u/:shortURL', (req, res) => {
   }
   res.redirect(longURL);
 });
-
-// Makes a username cookie to store user data
-app.post("/logOn", (req,res) => {
-  
-  res.redirect("/login");
- 
- });
 
 app.post('/register', (req, res) => {
   const {email, password } = req.body;
