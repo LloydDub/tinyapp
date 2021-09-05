@@ -45,15 +45,14 @@ const urlDatabase = {
 };
 
 app.post("/login", (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
+  const {email, password } = req.body;
 
   if (!emailChecker(email)) {
-    res.send(403, "There is no account associated with this email address");
+    res.status(403).send("Email not signed up.");
   } else {
     const user_id = emailChecker(email);
     if (users[user_id].password !== password) {
-      res.send(403, "The password you entered does not match the one associated with the provided email address");
+      res.status(403).send("Password incorrect");
     } else {
       res.cookie('user_id', user_id);
       res.redirect("/urls");
