@@ -38,13 +38,21 @@ const users = {
   }
 };
 
-// this is a JSON database of urls...proto shortener.
+// const urlDatabase = {
+//   'b2xVn2': 'http://www.lighthouselabs.ca',
+//   '9sm5xK': 'http://www.google.com'
+// };
+
+
 const urlDatabase = {
-  'b2xVn2': 'http://www.lighthouselabs.ca',
-  '9sm5xK': 'http://www.google.com'
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
+  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
 };
 
+
+
 app.post("/login", (req, res) => {
+  
   const {email, password } = req.body;
 
   if (!emailChecker(email)) {
@@ -69,7 +77,7 @@ app.get('/login', (req, res) => {
   res.render("urls_login", templateVars);
 });
 
-// 
+// makes newe user ids
 const addUser = (email, password) => {
   const id = generateRandomString()
   users[id] = {
@@ -94,23 +102,34 @@ res.redirect("/register");
 
 });
 
-// POST for generating smoll url w\ genrandom string
+// POST for generating smoll url w\ genrandom string   112
 app.post('/urls', (req, res) => {
+  if (!req.cookie.user_id) {
+    res.redirect('/login');
+
+  }
   const shortURL = generateRandomString(); // if long url exsists
-  urlDatabase[shortURL] = req.body.longURL;
-  
+  urlDatabase[shortURL] = req.body.longURL;  
   res.redirect(`urls/${shortURL}`);
   
 });
 
 // POST for handling delete function
 app.post('/urls/:shortURL/delete', (req, res) => {
+  if (!req.cookie.user_id) {
+    res.redirect('/login');
+
+  }
   delete urlDatabase[req.params.shortURL];
   res.redirect('/urls');
 
 });
 
 app.post('/urls/:shortURL', (req, res) => {
+  if (!req.cookie.user_id) {
+    res.redirect('/login');
+
+  }
   
   urlDatabase[req.params.shortURL] = req.body.longURL;
   res.redirect('/urls');
@@ -119,6 +138,10 @@ app.post('/urls/:shortURL', (req, res) => {
 
 
 app.post('/urls/:shortURL/delete', (req, res) => {
+  if (!req.cookie.user_id) {
+    res.redirect('/login');
+
+  }
   delete urlDatabase[req.params.shortURL];
   res.redirect('/urls');
 
@@ -165,9 +188,13 @@ app.get('/urls.json', (req, res) => {
 
 //passes the URL data to temmplate3
 app.get('/urls', (req, res) => {
+  if (!req.cookie.user_id) {
+    res.send('user not logged in');
+
+  }
   const templateVars = {
     user: users[req.cookies["user_id"]],
-    urls: urlDatabase 
+    urls: urlDatabase // have database passed through a helper function so we get user specific urls
   };
   res.render('urls_index', templateVars);
 });
