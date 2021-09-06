@@ -51,6 +51,13 @@ const urlDatabase = {
 
 
 
+
+
+
+
+
+
+
 app.post("/login", (req, res) => {
   
   const {email, password } = req.body;
@@ -76,6 +83,14 @@ app.get('/login', (req, res) => {
   };
   res.render("urls_login", templateVars);
 });
+
+
+
+
+
+
+
+
 
 // makes newe user ids
 const addUser = (email, password) => {
@@ -188,14 +203,15 @@ app.get('/urls.json', (req, res) => {
 
 //passes the URL data to temmplate3
 app.get('/urls', (req, res) => {
-  if (!req.cookie.user_id) {
-    res.send('user not logged in');
-
-  }
   const templateVars = {
     user: users[req.cookies["user_id"]],
     urls: urlDatabase // have database passed through a helper function so we get user specific urls
   };
+  if (!req.cookies.user_id) {
+    return res.send('user not logged in');
+
+  }  
+  
   res.render('urls_index', templateVars);
 });
 
