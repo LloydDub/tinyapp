@@ -24,6 +24,8 @@ const emailChecker = (email) => {
   return null;
 };
 
+// const urlsForUser = function(id) {}
+
 //Global user object
 const users = { 
   "userRandomID": {
@@ -105,7 +107,7 @@ const addUser = (email, password) => {
 
 app.post("/logOn", (req,res) => {
   
-  res.redirect("/login");
+ return res.redirect("/login"); 
  
 });
 
@@ -119,19 +121,21 @@ res.redirect("/register");
 
 // POST for generating smoll url w\ genrandom string   112
 app.post('/urls', (req, res) => {
-  if (!req.cookie.user_id) {
+  if (!req.cookies.user_id) {
     res.redirect('/login');
 
   }
   const shortURL = generateRandomString(); // if long url exsists
-  urlDatabase[shortURL] = req.body.longURL;  
+  const urlObject = { longURL: req.body.longURL, userID: req.cookies.user_id }
+  urlDatabase[shortURL] = urlObject;
+  console.log(req.body.longURL)  
   res.redirect(`urls/${shortURL}`);
   
 });
 
 // POST for handling delete function
 app.post('/urls/:shortURL/delete', (req, res) => {
-  if (!req.cookie.user_id) {
+  if (!req.cookies.user_id) {
     res.redirect('/login');
 
   }
@@ -141,8 +145,8 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 });
 
 app.post('/urls/:shortURL', (req, res) => {
-  if (!req.cookie.user_id) {
-    res.redirect('/login');
+  if (!req.cookies.user_id) {
+     return res.redirect('/login');
 
   }
   
@@ -153,8 +157,8 @@ app.post('/urls/:shortURL', (req, res) => {
 
 
 app.post('/urls/:shortURL/delete', (req, res) => {
-  if (!req.cookie.user_id) {
-    res.redirect('/login');
+  if (!req.cookies.user_id) {
+    return res.redirect('/login');
 
   }
   delete urlDatabase[req.params.shortURL];
@@ -181,7 +185,7 @@ app.get('/register', (req, res) => {
 
 // this registers the a handler on the root path of '/'
 app.get('/', (req, res) => {
-  res.redirect("/urls");
+  res.redirect("/login");
 });
 
 
@@ -208,7 +212,8 @@ app.get('/urls', (req, res) => {
     urls: urlDatabase // have database passed through a helper function so we get user specific urls
   };
   if (!req.cookies.user_id) {
-    return res.send('user not logged in');
+
+     return res.redirect("/login")
 
   }  
   
@@ -219,22 +224,31 @@ app.get('/urls', (req, res) => {
 app.get('/urls/new', (req, res) => {
   let templateVars = { 
     user: users[req.cookies["user_id"]],
-};
+  }
+  if (!req.cookies.user_id) {
+    return res.redirect('/login');
+
+  }
   res.render("urls_new", templateVars);
 });
+
 
 app.get('/urls/:shortURL', (req, res) => {
 
   const templateVars = { 
     user: users[req.cookies["user_id"]],
     shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL] 
+    longURL: urlDatabase[req.params.shortURL].longURL 
   };
+  console.log(templateVars.longURL)
   res.render('urls_show', templateVars);
 });
 
+
+
+
 app.get('/u/:shortURL', (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   if (!urlDatabase[req.params.shortURL]) {
     return res.send('Error, please check your shortened URL');
   }
