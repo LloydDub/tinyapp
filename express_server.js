@@ -6,6 +6,7 @@ app.use(cookieParser());
 app.set('view engine', 'ejs');
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended: true}));
+const bcrypt = require('bcrypt');
 
 // GLOBAL STUFF \\
 
@@ -40,10 +41,12 @@ const urlsForUser = function(id) {
 // makes newe user ids
 const addUser = (email, password) => {
   const id = generateRandomString()
+  
+  const hashedPassword = bcrypt.hashSync(password, 10);
   users[id] = {
     id,
     email,
-    password
+    hashedPassword
   };
   return id;
 };
@@ -51,16 +54,7 @@ const addUser = (email, password) => {
 
 //Global user object
 const users = { 
-  'userRandomID': {
-    id: 'userRandomID', 
-    email: 'user@example.com', 
-    password: 'purple-monkey-dinosaur'
-  },
- 'user2RandomID': {
-    id: 'user2RandomID', 
-    email: 'user2@example.com', 
-    password: 'dishwasher-funk'
-  }
+  
 };
 
 // const urlDatabase = {
@@ -80,26 +74,24 @@ const urlDatabase = {
 
 
 
-
-
-
-app.post('/login', (req, res) => {
-  
-  const {email, password } = req.body;
-
+app.post("/login", (req, res) => {
+  const { email, password } = req.body;
   if (!emailChecker(email)) {
-    res.status(403).send('Email not signed up.');
+    res.status(403).send("Email not signed up.");
   } else {
     const user_id = emailChecker(email);
-    if (users[user_id].password !== password) {
-      res.status(403).send('Password incorrect');
-    } else {
-      res.cookie('user_id', user_id);
-      res.redirect('/urls');
+    if (user_id) {
+      let valid = bcrypt.compare(password, users[user_id].hashedPassword);
+      if (valid) {
+        res.cookie("user_id", user_id);
+        res.redirect("/urls");
+      } else {
+        res.status(403).send("Password incorrect");
+      }
     }
   }
-
 });
+
 
 app.get('/login', (req, res) => {
   const templateVars = {
