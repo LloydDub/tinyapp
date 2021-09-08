@@ -164,12 +164,11 @@ app.post('/urls', (req, res) => {
 
 // POST for handling delete function
 app.post('/urls/:shortURL/delete', (req, res) => {
-  if (!req.cookies.user_id) {
-    res.redirect('/login');
-
+  const shortURL = req.params.shortURL;
+  if (req.cookies['user_id'] === urlDatabase[shortURL].userID) {
+    delete urlDatabase[shortURL];
   }
-  delete urlDatabase[req.params.shortURL];
-  res.redirect('/urls');
+  
 
 });
 
