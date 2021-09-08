@@ -11,8 +11,8 @@ const cookieSession = require('cookie-session');
 
 app.use(cookieSession({
   name: 'session',
-  keys: ['test1', 'test2'] 
-}))
+  keys: ['test1', 'test2']
+}));
 
 // GLOBAL STUFF \\
 
@@ -23,7 +23,7 @@ function generateRandomString() {
 }
 
 const emailChecker = (email) => {
-  for (const user in users) {    
+  for (const user in users) {
     if (users[user].email === email) {
       return user;
     }
@@ -46,7 +46,7 @@ const urlsForUser = function(id) {
 
 // makes newe user ids
 const addUser = (email, password) => {
-  const id = generateRandomString()
+  const id = generateRandomString();
   
   const hashedPassword = bcrypt.hashSync(password, 10);
   users[id] = {
@@ -59,7 +59,7 @@ const addUser = (email, password) => {
 
 
 //Global user object
-const users = { 
+const users = {
   
 };
 
@@ -74,11 +74,65 @@ const urlDatabase = {
   i3BoGr: { longURL: 'https://www.google.ca', userID: 'aJ48lW' }
 };
 
-
-
-
 // req.session.user_id :req.cookie
 // req.session.user_id = user.userID; :res.cookie
+
+
+////////////
+
+///root
+// this registers the a handler on the root path of '/'
+app.get('/', (req, res) => {
+  res.redirect('/login');
+});
+
+//top header button controls.
+app.post('/logOn', (req,res) => {
+  
+  return res.redirect('/login');
+  
+});
+ 
+app.post('/signUp', (req,res) => {
+   
+  res.redirect('/register');
+ 
+});
+
+
+
+//Register
+
+app.post('/register', (req, res) => {
+  const {email, password } = req.body;
+
+  if (email === '' || password === '') {
+    return res.status(400).send('400 Bad Request');
+  }
+
+  if (emailChecker(email)) {
+    return res.status(400).send('Email Already Registered');
+  }
+  
+  
+  
+  const user_id = addUser(email, password); // id from addUser 
+  req.session.user_id = user_id;
+  res.redirect('/urls');
+   
+});
+
+// user_id login using cookies
+app.get('/register', (req, res) => {
+  const templateVars = {
+
+    user: users[req.session.user_id],
+    urls: urlDatabase
+  };
+  res.render('urls_register', templateVars);
+});
+
+//Login
 
 
 app.post("/login", (req, res) => {
@@ -90,7 +144,7 @@ app.post("/login", (req, res) => {
     if (user_id) {
       let valid = bcrypt.compare(password, users[user_id].hashedPassword);
       if (valid) {
-        req.session.user_id = users.userID;
+        req.session.user_id;
         res.redirect("/urls");
       } else {
         res.status(403).send("Password incorrect");
@@ -102,65 +156,27 @@ app.post("/login", (req, res) => {
 
 app.get('/login', (req, res) => {
   const templateVars = {
-    user: users[req.session.user_id = users.userID],
-    urls: urlDatabase 
+    user: users[req.session.user_id],
+    urls: urlDatabase
   };
   res.render('urls_login', templateVars);
 });
 
 
 
-
-//top header button controls.
-app.post('/logOn', (req,res) => {
-  
- return res.redirect('/login'); 
- 
-});
-
-app.post('/signUp', (req,res) => {
-  
-res.redirect('/register');
-
-});
-
-
-
-// req.session.user_id :req.cookie
-// req.session.user_id = user.userID; :res.cookie
-
-
-
-
-// POST for generating smoll url w\ genrandom string   112
+// POST for generating smoll url w\ genrandom string
 app.post('/urls', (req, res) => {
   if (!req.session.user_id) {
     return res.redirect('/login');
   }
-
-  const shortURL = generateRandomString(); // if long url exsists
-
-
-  const urlObject = { 
-
-    longURL: req.body.longURL, 
-    userID: req.session.user_id 
-
+  const shortURL = generateRandomString();
+  const urlObject = {
+    longURL: req.body.longURL,
+    userID: req.session.user_id
   };
-
   urlDatabase[shortURL] = urlObject;
-
-  
-
   res.redirect(`urls/${shortURL}`);
-  
 });
-
-
-
-
-
-
 
 
 // POST for handling delete function
@@ -169,28 +185,15 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   if (req.session.user_id === urlDatabase[shortURL].userID) {
     delete urlDatabase[shortURL];
   }
-  
-
 });
-
-
 
 app.post('/urls/:shortURL', (req, res) => {
   if (!req.session.user_id) {
-     return res.redirect('/login');
-
+    return res.redirect('/login');
   }
-  
   urlDatabase[req.params.shortURL] = req.body.longURL;
-
-  
   res.redirect('/urls');
 });
-
-
-
-
-
 
 app.post('/urls/:shortURL/delete', (req, res) => {
   if (!req.session.user_id) {
@@ -201,45 +204,16 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 
 });
 
-
-
-
 //POST for logout button
 app.post('/logout', (req, res) => {
-  res.clearCookie('user_id');
+  req.session = null
   res.redirect('/login');
 });
-
-
-
-
-
-// user_id login using cookies
-app.get('/register', (req, res) => {
-  const templateVars = {
-
-    user: users[req.session.user_id],
-    urls: urlDatabase 
-  };
-  res.render('urls_register', templateVars);
-});
-
-
-
-
-// this registers the a handler on the root path of '/'
-app.get('/', (req, res) => {
-  res.redirect('/login');
-});
-
 
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
-
-
 
 
 // reguest handler for urldatabase
@@ -248,46 +222,27 @@ app.get('/urls.json', (req, res) => {
 });
 
 
-
-
-
-
-
 //passes the URL data to temmplate3
 app.get('/urls', (req, res) => {
-   if (!req.session.user_id) {
-     return res.redirect('/login')
-    };  
-  
-  // const userID = req.session.user_id;
-  // const userUrls = urlsForUser(userID);
-  
+  if (!req.session.user_id) {
+    return res.redirect('/login');
+  }
+  const userID = req.session.user_id;
+  const userUrls = urlsForUser(userID);
   const templateVars = {
-    user: users[req.session.user_id],
-    urls: userUrls 
+    user: users[userID],
+    urls: userUrls
   };
-         
-res.render('urls_index', templateVars);
-
-
+  res.render('urls_index', templateVars);
 });
-
-
-
-
-
-
-
-
-
 
 
 
 //template for new urls page w/username banner
 app.get('/urls/new', (req, res) => {
-  let templateVars = { 
+  let templateVars = {
     user: users[req.session.user_id],
-  }
+  };
   if (!req.session.user_id) {
     return res.redirect('/login');
 
@@ -298,19 +253,19 @@ app.get('/urls/new', (req, res) => {
 
 app.get('/urls/:shortURL', (req, res) => {
 
-  const templateVars = { 
+  const templateVars = {
     user: users[req.session.user_id],
-    shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL].longURL 
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL].longURL
   };
-  console.log(templateVars.longURL)
+  console.log(templateVars.longURL);
   res.render('urls_show', templateVars);
 });
 
 
 
 
-app.get('/u/:shortURL', (req, res) => {
+app.get('/urls/:shortURL', (req, res) => {
   const longURL = urlDatabase[req.params.shortURL].longURL;
   if (!urlDatabase[req.params.shortURL]) {
     return res.send('Error, please check your shortened URL');
@@ -321,20 +276,6 @@ app.get('/u/:shortURL', (req, res) => {
 
 
 
-app.post('/register', (req, res) => {
-  const {email, password } = req.body;
-  if (emailChecker(email)) {
-    return res.status(400).send('Email Already Registered');
-  }   
-  const user_id = addUser(email, password);
-  console.log('Here it is', user_id)
-  if (email === '' || password === '') {
-    return res.status(400).send('400 Bad Request');
-  } 
-  
-    req.session.user_id = users.userID;
-    res.redirect('/urls');
-   
-});
+
 
 
