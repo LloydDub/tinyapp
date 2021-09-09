@@ -1,3 +1,4 @@
+
 const express = require('express');
 const app = express();
 const PORT = 8080; // default port 8080
@@ -8,7 +9,7 @@ const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended: true}));
 const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session');
-
+const { emailChecker } = require("./helpers")
 app.use(cookieSession({
   name: 'session',
   keys: ['test1', 'test2']
@@ -22,14 +23,14 @@ function generateRandomString() {
   return result;
 }
 
-const emailChecker = (email) => {
-  for (const user in users) {
-    if (users[user].email === email) {
-      return user;
-    }
-  }
-  return null;
-};
+// const emailChecker = (email, users) => {
+//   for (const user in users) {
+//     if (users[user].email === email) {
+//       return user;
+//     }
+//   }
+//   return null;
+// };
 
 
 // fuction to filter URL DATABASE
@@ -110,7 +111,7 @@ app.post('/register', (req, res) => {
     return res.status(400).send('400 Bad Request');
   }
 
-  if (emailChecker(email)) {
+  if (emailChecker(email, users)) {
     return res.status(400).send('Email Already Registered');
   }
   
@@ -137,10 +138,10 @@ app.get('/register', (req, res) => {
 
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
-  if (!emailChecker(email)) {
+  if (!emailChecker(email, users)) {
     res.status(403).send("Email not signed up.");
   } else {
-    const user_id = emailChecker(email);
+    const user_id = emailChecker(email, users);
     if (user_id) {
       let valid = bcrypt.compare(password, users[user_id].hashedPassword);
       if (valid) {
