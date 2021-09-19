@@ -4,15 +4,12 @@ const app = express();
 
 const PORT = 8080; // default port 8080
 
-const cookieParser = require('cookie-parser');
-
-app.use(cookieParser());
-
 app.set('view engine', 'ejs');
 
 const bodyParser = require('body-parser');
 
 app.use(bodyParser.urlencoded({extended: true}));
+
 const bcrypt = require('bcrypt');
 
 const cookieSession = require('cookie-session');
@@ -69,8 +66,12 @@ const users = {
 
 const urlDatabase = {
   b6UTxQ: { longURL: 'https://www.tsn.ca', userID: 'aJ48lW' },
-  i3BoGr: { longURL: 'https://www.google.ca', userID: 'aJ48lW' }
+  i3BoGr: { longURL: 'https://www.google.ca', userID: 'aJ48lW' },
+  
+
 };
+
+
 
 ////////////
 
@@ -181,7 +182,7 @@ app.post('/urls/:shortURL', (req, res) => {
   if (!req.session.user_id) {
     return res.redirect('/login');
   }
-  urlDatabase[req.params.shortURL] = req.body.longURL;
+  urlDatabase[req.params.shortURL]['longURL'] = req.body['longURL'];
   res.redirect('/urls');
 });
 
@@ -252,20 +253,10 @@ app.get('/urls/:shortURL', (req, res) => {
   res.render('urls_show', templateVars);
 });
 
-
-
-
-app.get('/urls/:shortURL', (req, res) => {
+app.get('/u/:shortURL', (req, res) => {
   const longURL = urlDatabase[req.params.shortURL].longURL;
   if (!urlDatabase[req.params.shortURL]) {
     return res.send('Error, please check your shortened URL');
   }
   res.redirect(longURL);
 });
-
-
-
-
-
-
-
