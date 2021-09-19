@@ -42,6 +42,12 @@ express
 
 require
 
+nodemon
+
+## Setup
+
+Clone the repo into directory of choice. To run type 'npm start' in the directory with express_server.js
+
 
 ## Functionality checklist
 
